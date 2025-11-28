@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff — Memberships | KEC IEF (Debug)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;font-family:'Raleway',sans-serif;background:#050509;color:#fff}
+    .navbar{position:sticky;top:0;padding:14px 24px;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px)}
+    .brand{font-weight:700;font-size:20px}
+    .wrap{padding:20px;max-width:1100px;margin:0 auto}
+    .card{background:rgba(255,255,255,0.03);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+    .controls{display:flex;gap:12px;margin-bottom:12px}
+    .controls input, .controls select{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);color:#fff}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
+    .list{max-height:60vh;overflow:auto;padding-right:6px}
+    .member{display:flex;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:10px;background:rgba(255,255,255,0.02)}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .btn-delete{background:#ef4444;color:#fff}
+    .btn-view{background:#60a5fa;color:#fff}
+    .small{color:#9aa4b2}
+    .error{color:#ffb4b4;background:rgba(255,0,0,0.06);padding:8px;border-radius:6px;margin-bottom:12px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="brand">KEC • IEF — Memberships (Debug)</div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>Registered Members</h2>
+
+      <div id="diagnostic" class="small" style="margin-top:8px;color:#9aa4b2">
+        Diagnostics: using backend <code id="apiUrl"></code>
+      </div>
+
+      <div id="errorBox" style="margin-top:10px"></div>
+
+      <div style="margin-top:12px" class="controls">
+        <input id="searchInput" placeholder="Search name / roll / email" />
+        <select id="deptFilter"><option value="">All Departments</option></select>
+        <select id="yearFilter"><option value="">All Years</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>MBA/MCA</option></select>
+        <button id="refreshBtn" class="btn" style="background:#fff;color:#000">Refresh</button>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="list" id="membersList">Loading...</div>
+        </div>
+
+        <div>
+          <div class="card" id="memberDetail">
+            <h3>Select a member</h3>
+            <p class="small">Click left to view details.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --------- IMPORTANT: force API to the backend host:port you're running ----------
+  const API = 'http://localhost:4000';    // <<<< set this to your backend if different
+  document.getElementById('apiUrl').textContent = API + '/api/members';
+
+  let members = [];
+  let selected = null;
+  const membersList = document.getElementById('membersList');
+  const memberDetail = document.getElementById('memberDetail');
+  const searchInput = document.getElementById('searchInput');
+  const deptFilter = document.getElementById('deptFilter');
+  const yearFilter = document.getElementById('yearFilter');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const errorBox = document.getElementById('errorBox');
+
+  refreshBtn.addEventListener('click', fetchMembers);
+  searchInput.addEventListener('input', renderList);
+  deptFilter.addEventListener('change', renderList);
+  yearFilter.addEventListener('change', renderList);
+
+  async function fetchMembers(){
+    errorBox.innerHTML = ''; membersList.innerHTML = 'Loading...';
+    try {
+      const res = await fetch(API + '/api/members', { method: 'GET' });
+      if (!res.ok) {
+        const text = await res.text();
+        showError(`Server responded ${res.status}: ${text}`);
+        membersList.innerHTML = 'Failed to load members. See error above.';
+        return;
+      }
+      const json = await res.json();
+      if (!json.success) {
+        showError('Server returned success:false — ' + (json.error || 'unknown'));
+        membersList.innerHTML = 'Failed to load members. Check server.';
+        return;
+      }
+      members = json.items || [];
+      populateDeptFilter();
+      renderList();
+      if (members.length) selectMember(members[0]._id);
+    } catch (err) {
+      showError('Network / Fetch error: ' + (err.message || err));
+      membersList.innerHTML = 'Failed to load members. Check server.';
+      console.error(err);
+    }
+  }
+
+  function showError(msg){
+    errorBox.innerHTML = `<div class="error">${escapeHtml(msg)}</div>
+      <div style="margin-top:8px"><button onclick="fetchMembers()" class="btn" style="background:#fff;color:#000">Retry</button></div>`;
+  }
+
+  function populateDeptFilter(){
+    const depts = Array.from(new Set(members.map(m => m.department).filter(Boolean)));
+    deptFilter.innerHTML = '<option value="">All Departments</option>';
+    depts.forEach(d => { const o=document.createElement('option'); o.value=d; o.textContent=d; deptFilter.appendChild(o); });
+  }
+
+  function renderList(){
+    const q = searchInput.value.trim().toLowerCase();
+    const dept = deptFilter.value; const yr = yearFilter.value;
+    const list = members.filter(m => {
+      if (dept && m.department !== dept) return false;
+      if (yr && m.year !== yr) return false;
+      if (!q) return true;
+      return (m.fullName||'').toLowerCase().includes(q) ||
+             (m.rollno||'').toLowerCase().includes(q) ||
+             (m.emailKongu||'').toLowerCase().includes(q) ||
+             (m.emailPersonal||'').toLowerCase().includes(q);
+    });
+    membersList.innerHTML = '';
+    if (!list.length) { membersList.innerHTML = '<p class="small">No results.</p>'; memberDetail.innerHTML = '<h3>No member selected</h3>'; return; }
+    list.forEach(m => {
+      const d = document.createElement('div'); d.className='member';
+      d.innerHTML = `<div style="flex:1"><div style="font-weight:700">${escapeHtml(m.fullName)}</div><div class="small">${escapeHtml(m.rollno)} • ${escapeHtml(m.department)} • ${escapeHtml(m.year)}</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px">${createBtn('View',(e)=>selectMember(m._id))}${createBtn('Delete',(e)=>confirmDelete(m._id),'btn-delete')}</div>`;
+      membersList.appendChild(d);
+    });
+  }
+
+  function createBtn(text, handler, cls='btn-view'){ const b=document.createElement('button'); b.className='btn '+(cls||'btn-view'); b.textContent=text; b.onclick=handler; return b; }
+
+  function selectMember(id){
+    const sel = members.find(x=>x._id===id);
+    if (!sel) return;
+    selected = sel;
+    memberDetail.innerHTML = `<h3>${escapeHtml(sel.fullName)}</h3>
+      <div class="small">${escapeHtml(sel.rollno)} • ${escapeHtml(sel.department)} • ${escapeHtml(sel.year)}</div><hr/>
+      <div><strong>Kongu Email:</strong> ${escapeHtml(sel.emailKongu||'')}</div>
+      <div><strong>Personal Email:</strong> ${escapeHtml(sel.emailPersonal||'')}</div>
+      <div><strong>Phone:</strong> ${escapeHtml(sel.phone||'')}</div>
+      <div style="margin-top:8px"><strong>Reason:</strong><div class="small">${escapeHtml(sel.reason||'')}</div></div>
+      <div style="margin-top:12px"><button class="btn btn-delete" onclick="confirmDelete('${sel._id}')">Delete Member</button></div>`;
+  }
+
+  function confirmDelete(id){ if (!confirm('Delete this membership? This cannot be undone.')) return; deleteMember(id); }
+
+  async function deleteMember(id){
+    try {
+      const res = await fetch(API + '/api/members/' + encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) {
+        const txt = await res.text();
+        alert('Delete failed: ' + res.status + ' ' + txt);
+        return;
+      }
+      const json = await res.json();
+      if (json.success) {
+        members = members.filter(m=>m._id !== id);
+        renderList();
+        memberDetail.innerHTML = '<h3>Deleted</h3><p class="small">Record removed.</p>';
+      } else alert('Delete failed: ' + (json.error || 'unknown'));
+    } catch (err) {
+      alert('Delete request failed: ' + err.message);
+    }
+  }
+
+  function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // load on open
+  fetchMembers();
+</script>
+</body>
+</html>

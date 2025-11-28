@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IEF — OD Application</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;font-family:'Raleway',sans-serif;background:#04050a;color:#fff}
+    .navbar{backdrop-filter:blur(10px);background:rgba(0,0,0,0.35);padding:14px 28px;position:fixed;top:0;left:0;right:0;z-index:999;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between}
+    .brand{font-size:22px;font-weight:700}
+    .links a{color:#bfc8d3;text-decoration:none;margin-left:18px}
+    .page{padding:110px 20px;display:flex;justify-content:center}
+    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:22px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    h1{margin:0 0 12px 0}
+    label{display:block;margin-bottom:6px;color:#dbe6ff;font-weight:600}
+    input, select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#fff;margin-bottom:12px;box-sizing:border-box}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+    .btn{background:#fff;color:#000;padding:10px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
+    .muted{color:#9aa4b2;font-size:13px}
+    .alert{padding:10px;border-radius:8px;margin-bottom:12px}
+    .ok{background:rgba(16,185,129,0.12);color:#10b981}
+    .err{background:rgba(239,68,68,0.08);color:#ef4444}
+    .row-small{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">KEC • IEF</div>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="calendar.html">Events</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="card">
+      <h1>On-Duty / Leave Request</h1>
+      <div id="message"></div>
+
+      <form id="odForm" enctype="multipart/form-data" autocomplete="off">
+        <div class="grid2">
+          <div>
+            <label for="fullName">Full name</label>
+            <input id="fullName" name="fullName" type="text" required />
+          </div>
+          <div>
+            <label for="rollNo">Roll No</label>
+            <input id="rollNo" name="rollNo" type="text" required />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="emailKongu">Kongu Email</label>
+            <input id="emailKongu" name="emailKongu" type="email" placeholder="abc@kongu.edu" required />
+          </div>
+          <div>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="10-digit" required />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="department">Department</label>
+            <select id="department" name="department" required>
+              <option value="">Select</option>
+              <option>CSE</option><option>ECE</option><option>EEE</option><option>MECH</option><option>CIVIL</option><option>IT</option><option>BME</option><option>Biotech</option>
+            </select>
+          </div>
+          <div>
+            <label for="year">Year</label>
+            <select id="year" name="year" required>
+              <option value="">Select</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>MBA/MCA</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="odDate">OD Date</label>
+            <input id="odDate" name="odDate" type="date" required />
+          </div>
+          <div>
+            <label for="eventName">Event / Place (optional)</label>
+            <input id="eventName" name="eventName" type="text" placeholder="e.g. Tech Fest / Internship" />
+          </div>
+        </div>
+
+        <div>
+          <label for="reason">Reason / Explanation</label>
+          <textarea id="reason" name="reason" rows="4" required></textarea>
+        </div>
+
+        <div>
+          <label for="proof">Proof (pdf / jpg / png) — optional but recommended</label>
+          <input id="proof" name="proof" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+          <div class="muted">Max 10 MB. Files stored on server for staff review.</div>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:12px;align-items:center">
+          <button type="submit" class="btn">Submit Request</button>
+          <div id="loading" style="display:none" class="muted">Submitting…</div>
+        </div>
+      </form>
+
+      <div style="margin-top:12px" class="muted">After submission staff will review and update the status.</div>
+    </div>
+  </div>
+
+<script>
+  // API base: if served from the same server use '', otherwise point to your backend
+  const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:4000' : '';
+
+  const form = document.getElementById('odForm');
+  const message = document.getElementById('message');
+  const loadingEl = document.getElementById('loading');
+
+  function show(msg, type='ok') {
+    message.innerHTML = `<div class="alert ${type === 'ok' ? 'ok' : 'err'}">${msg}</div>`;
+    setTimeout(() => { if (message) message.innerHTML = ''; }, 6000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    message.innerHTML = '';
+    loadingEl.style.display = 'inline-block';
+
+    const fd = new FormData(form);
+
+    // quick client-side checks
+    const kongu = (fd.get('emailKongu') || '').toLowerCase();
+    if (!kongu.endsWith('@kongu.edu')) {
+      show('Please use an official Kongu email (abc@kongu.edu).', 'err');
+      loadingEl.style.display = 'none';
+      return;
+    }
+
+    const phone = (fd.get('phone') || '');
+    if (!/^\d{10}$/.test(phone)) {
+      show('Please enter a valid 10-digit phone number.', 'err');
+      loadingEl.style.display = 'none';
+      return;
+    }
+
+    try {
+      const res = await fetch((API || '') + '/api/ods', {
+        method: 'POST',
+        body: fd
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`Server ${res.status}: ${txt}`);
+      }
+
+      const json = await res.json();
+      if (json.success) {
+        show('Request submitted — staff will review it.', 'ok');
+        form.reset();
+      } else {
+        show('Submission failed: ' + (json.error || 'Server error'), 'err');
+      }
+    } catch (err) {
+      console.error(err);
+      show('Network or server error — check console.', 'err');
+    } finally {
+      loadingEl.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

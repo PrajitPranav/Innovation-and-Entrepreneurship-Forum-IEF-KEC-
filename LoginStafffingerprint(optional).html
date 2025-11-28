@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IEF Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Roboto;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-image: url(https://img.freepik.com/free-photo/product-showcase-with-spotlight-black-studio-room-background-use-as-montage-product-display_1258-108767.jpg?t=st=1741811560~exp=1741815160~hmac=3f16584da81d4c564f3bf024201b4fa5725136897b4dd98233b245c8c0c10693&w=1800);
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Navbar Styles */
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px 4%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        z-index: 100;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .navbar .logo {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-left: -10px;
+      }
+
+      .navbar .nav-links {
+        display: flex;
+        gap: 20px;
+        margin-right: 110px;
+      }
+
+      .navbar .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        position: relative;
+        padding-bottom: 5px;
+        transition: color 0.3s ease;
+      }
+
+      .navbar .nav-links a:hover {
+        color: #007bff;
+      }
+
+      .center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 29vw;
+        background: black;
+        border-radius: 10px;
+        padding-bottom: 40px;
+      }
+
+      .center h1 {
+        text-align: center;
+        padding: 0 0 20px 0;
+        border-bottom: 1px solid silver;
+        color: bisque;
+      }
+
+      .center form {
+        padding: 0 40px;
+        box-sizing: border-box;
+      }
+
+      .txt_field {
+        position: relative;
+        border-bottom: 2px solid #adadad;
+        margin: 30px 0;
+      }
+
+      .txt_field input {
+        color: white;
+        width: 100%;
+        padding: 0 5px;
+        height: 40px;
+        font-size: 16px;
+        border: none;
+        background: none;
+        outline: none;
+      }
+
+      .txt_field label {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        color: #adadad;
+        transform: translateY(-50%);
+        font-size: 16px;
+        pointer-events: none;
+      }
+
+      /* Button Style */
+      input[type="submit"] {
+        width: 100%;
+        height: 50px;
+        border: 1px solid;
+        border-radius: 25px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        background: white;
+        color: black;
+        transition: 0.3s;
+      }
+
+      input[type="submit"]:hover {
+        background: #007bff;
+        color: white;
+      }
+
+      /* Popup Styling */
+      #popup {
+        display: none;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 999;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      #popup p {
+        margin-bottom: 20px;
+        color: #000;
+      }
+
+      #popup button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      #popup button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="logo">KEC-IEF</div>
+      <div class="nav-links">
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="center">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <div class="txt_field">
+          <input type="text" placeholder="Username" />
+          <label></label>
+        </div>
+        <div class="txt_field">
+          <input type="password" placeholder="Password" required />
+          <label></label>
+        </div>
+        <input id="loginButton" type="submit" value="Login" />
+      </form>
+    </div>
+
+    <!-- Fingerprint Popup -->
+    <div id="popup">
+      <p>Please scan your fingerprint to continue</p>
+      <button onclick="authenticateFingerprint()">Scan Fingerprint</button>
+    </div>
+
+    <script>
+      // Show popup when login button is clicked
+      document.getElementById('loginButton').addEventListener('click', function(event) {
+        event.preventDefault();
+        document.getElementById('popup').style.display = 'block';
+      });
+
+      // Fingerprint Authentication using WebAuthn API
+      async function authenticateFingerprint() {
+  try {
+    const publicKey = {
+      challenge: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+      rp: { name: "KEC-IEF" },
+      user: {
+        id: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+        name: "user@example.com",
+        displayName: "User"
+      },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+    };
+
+    // Prompt fingerprint sensor
+    const credential = await navigator.credentials.create({ publicKey });
+
+    if (credential) {
+      alert("Fingerprint authentication successful!");
+
+      // ✅ Use a relative path for redirection
+      window.location.href = "Staffhomepage.html";
+    }
+  } catch (error) {
+    alert("Fingerprint authentication failed: " + error.message);
+  } finally {
+    document.getElementById('popup').style.display = 'none';
+  }
+}
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Library</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #000;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            background: #111;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        .title {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        .search-bar input {
+            width: 70%;
+            padding: 12px;
+            border: 2px solid #666;
+            border-radius: 8px;
+            background: #222;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .search-bar button {
+            padding: 12px 18px;
+            margin-left: 10px;
+            border: none;
+            background: #fff;
+            color: #000;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .search-bar button:hover {
+            background: #ddd;
+        }
+        .resource-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .resource-card {
+            background: #222;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, background 0.3s, color 0.3s;
+            width: 250px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .resource-card:hover {
+            transform: translateY(-8px);
+            background: #fff;
+            color: #000;
+        }
+        .resource-card:hover .icon,
+        .resource-card:hover .content h2,
+        .resource-card:hover .content p {
+            color: #000;
+        }
+        .resource-card:hover .content a {
+            background: #fff;
+            color: #000;
+            text-decoration: underline;
+        }
+        .resource-card:hover .content a:hover {
+            background: #ddd;
+            color: #000;
+            text-decoration: underline;
+        }
+        .icon {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .content h2 {
+            margin: 10px 0;
+            font-size: 1.4rem;
+            color: #fff;
+        }
+        .content p {
+            margin: 5px 0;
+            color: #ccc;
+            font-size: 1rem;
+        }
+        .content a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #ffffff;
+            color: #000;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.3s, color 0.3s, text-decoration 0.3s;
+        }
+        .content a:hover {
+            background: #f9f9f9;
+            color: #050505;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Resource Library</h1>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search resources...">
+            <button id="search-btn">🔍</button>
+        </div>
+        <div class="resource-list">
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Startup Guide</h2>
+                    <p>A comprehensive guide to launching your startup.</p>
+                    <a href="view1.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Business Model Canvas</h2>
+                    <p>A template to develop new business models.</p>
+                    <a href="view2.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Pitch Deck Examples</h2>
+                    <p>Collection of successful pitch decks.</p>
+                    <a href="view3.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Funding Resources</h2>
+                    <p>List of funding options for entrepreneurs.</p>
+                    <a href="view4.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Marketing Strategies</h2>
+                    <p>Learn how to market your startup effectively.</p>
+                    <a href="view5.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Legal Resources</h2>
+                    <p>Understand business laws and legal structures.</p>
+                    <a href="view6.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Financial Planning</h2>
+                    <p>Manage your startup’s budget and finances wisely.</p>
+                    <a href="view7.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Networking Guide</h2>
+                    <p>Build meaningful connections in your industry.</p>
+                    <a href="view8.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <h2>Growth Hacking</h2>
+                    <p>Techniques for rapid startup scaling.</p>
+                    <a href="view9.html" class="resource-btn">View Resource</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

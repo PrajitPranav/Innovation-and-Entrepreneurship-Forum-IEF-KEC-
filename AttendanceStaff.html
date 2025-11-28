@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff — OD Requests</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;font-family:'Raleway',sans-serif;background:#02030a;color:#fff}
+    .navbar{backdrop-filter:blur(10px);background:rgba(0,0,0,0.45);padding:14px 28px;position:sticky;top:0;z-index:999;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;align-items:center}
+    .brand{font-weight:700}
+    .wrap{padding:18px;display:flex;gap:18px}
+    .left{width:40%;min-width:320px}
+    .right{flex:1}
+    .card{background:rgba(255,255,255,0.02);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .list{max-height:72vh;overflow:auto;margin-top:12px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:10px;background:rgba(255,255,255,0.01);cursor:pointer}
+    .item:hover{background:rgba(255,255,255,0.02)}
+    .meta{color:#9aa4b2;font-size:13px}
+    .status{padding:6px 10px;border-radius:999px;font-weight:700}
+    .Pending{background:rgba(245,158,11,0.12);color:#f59e0b}
+    .Accepted{background:rgba(16,185,129,0.12);color:#10b981}
+    .Rejected{background:rgba(239,68,68,0.12);color:#ef4444}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .btn-acc{background:#10b981;color:#fff}
+    .btn-rej{background:#ef4444;color:#fff}
+    .btn-down{background:#60a5fa;color:#fff}
+    input,select{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:#fff}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    @media(max-width:900px){.wrap{flex-direction:column}.left{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="brand">KEC • IEF — OD Requests</div>
+    <div>
+      <a href="homepageStaff.html" style="color:#bfc8d3;text-decoration:none;margin-right:16px">Dashboard</a>
+      <a href="staff-members.html" style="color:#bfc8d3;text-decoration:none">Members</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="left">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>OD Requests</strong>
+            <div class="meta" style="margin-top:4px">Click an entry to view details</div>
+          </div>
+          <div>
+            <select id="filterStatus">
+              <option value="">All</option>
+              <option>Pending</option>
+              <option>Accepted</option>
+              <option>Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="controls">
+          <input id="searchBox" placeholder="Search name / roll / department" style="flex:1" />
+          <button id="refreshBtn" class="btn" style="background:#fff;color:#000">Refresh</button>
+        </div>
+
+        <div class="list" id="requestsList">Loading…</div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="card" id="detailsCard">
+        <h3>Select a request</h3>
+        <div class="meta">Click an item on the left to view details and take action.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // API base: same origin if served from backend; otherwise localhost:4000
+  const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:4000' : '';
+
+  let requests = [];
+  let selectedId = null;
+
+  const requestsList = document.getElementById('requestsList');
+  const detailsCard = document.getElementById('detailsCard');
+  const filterStatus = document.getElementById('filterStatus');
+  const searchBox = document.getElementById('searchBox');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  refreshBtn.addEventListener('click', loadRequests);
+  filterStatus.addEventListener('change', loadRequests);
+  searchBox.addEventListener('input', renderList);
+
+  async function loadRequests() {
+    requestsList.innerHTML = 'Loading…';
+    try {
+      const q = filterStatus.value ? '?status=' + encodeURIComponent(filterStatus.value) : '';
+      const res = await fetch((API || '') + '/api/ods' + q);
+      if (!res.ok) {
+        throw new Error('Server responded ' + res.status);
+      }
+      const json = await res.json();
+      requests = json.items || [];
+      renderList();
+      if (requests.length) selectRequest(requests[0]._id);
+    } catch (err) {
+      console.error(err);
+      requestsList.innerHTML = '<div class="meta">Failed to load requests — check server or network.</div>';
+    }
+  }
+
+  function renderList() {
+    const q = (searchBox.value || '').trim().toLowerCase();
+    requestsList.innerHTML = '';
+    const filtered = requests.filter(r => {
+      if (q) {
+        return (r.fullName || '').toLowerCase().includes(q) ||
+               (r.rollNo || '').toLowerCase().includes(q) ||
+               (r.department || '').toLowerCase().includes(q);
+      }
+      return true;
+    });
+
+    if (!filtered.length) {
+      requestsList.innerHTML = '<div class="meta">No requests found</div>';
+      detailsCard.innerHTML = '<h3>No request selected</h3><div class="meta">Select a request to view details</div>';
+      return;
+    }
+
+    filtered.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML = `<div>
+          <div style="font-weight:700">${escapeHtml(r.fullName)}</div>
+          <div class="meta">${escapeHtml(r.rollNo)} • ${escapeHtml(r.department)} • ${escapeHtml(r.year)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="meta">${new Date(r.submittedAt).toLocaleString()}</div>
+          <div style="margin-top:6px"><span class="status ${r.status}">${r.status}</span></div>
+        </div>`;
+      item.onclick = () => selectRequest(r._id);
+      requestsList.appendChild(item);
+    });
+  }
+
+  function selectRequest(id) {
+    selectedId = id;
+    const r = requests.find(x => x._id === id);
+    if (!r) return;
+    const proofLink = r.proofFile ? ((API || '') + r.proofFile) : null;
+    detailsCard.innerHTML = `
+      <h3>${escapeHtml(r.fullName)} <small class="meta">(${escapeHtml(r.rollNo)})</small></h3>
+      <div class="meta" style="margin-bottom:8px">${escapeHtml(r.department)} • ${escapeHtml(r.year)} • ${escapeHtml(r.emailKongu)}</div>
+
+      <div style="margin-top:8px"><strong>OD Date:</strong><div class="meta">${escapeHtml(r.odDate)}</div></div>
+      <div style="margin-top:8px"><strong>Event:</strong><div class="meta">${escapeHtml(r.eventName || '—')}</div></div>
+      <div style="margin-top:8px"><strong>Reason:</strong><div class="meta">${escapeHtml(r.reason)}</div></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+        ${proofLink ? `<a class="btn btn-down" href="${proofLink}" target="_blank" rel="noreferrer">Download Proof</a>` : ''}
+        <button class="btn btn-acc" onclick="updateStatus('${r._id}','Accepted')">Accept</button>
+        <button class="btn btn-rej" onclick="updateStatus('${r._id}','Rejected')">Reject</button>
+      </div>
+
+      <div style="margin-top:12px"><strong>Status:</strong> <span class="status ${r.status}">${r.status}</span></div>
+      <div style="margin-top:8px" class="meta"><small>Last updated: ${new Date(r.lastUpdated || r.submittedAt).toLocaleString()}</small></div>
+    `;
+  }
+
+  async function updateStatus(id, newStatus) {
+    const reviewer = prompt('Enter your name (optional)') || '';
+    try {
+      const res = await fetch((API || '') + '/api/ods/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, reviewer })
+      });
+      if (!res.ok) {
+        throw new Error('Server responded ' + res.status);
+      }
+      const json = await res.json();
+      if (json.success) {
+        // update the local list item
+        const idx = requests.findIndex(x => x._id === id);
+        if (idx >= 0) requests[idx] = json.item;
+        renderList();
+        selectRequest(id);
+        alert('Status updated to ' + newStatus);
+      } else {
+        alert('Update failed: ' + (json.error || 'server error'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network or server error while updating status');
+    }
+  }
+
+  function escapeHtml(s='') {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // initial load
+  loadRequests();
+</script>
+</body>
+</html>

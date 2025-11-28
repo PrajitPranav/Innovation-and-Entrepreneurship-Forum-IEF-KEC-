@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>OD Debug — Staff</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#071018;color:#e6eef6;padding:18px}
+    pre{background:#00121a;padding:12px;border-radius:8px;overflow:auto;color:#bde8ff}
+    .ok{color:#9ee6a0}
+    .err{color:#ff9b9b}
+  </style>
+</head>
+<body>
+  <h2>Debug — OD Requests</h2>
+  <p>This page forces API to <code>http://localhost:4000</code> and displays raw results.</p>
+
+  <div>
+    <button id="btnFetch">Fetch /api/ods</button>
+    <button id="btnShowCurl">Show curl command</button>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="Pending">Pending</option>
+      <option value="Accepted">Accepted</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+  </div>
+
+  <h3>Request info</h3>
+  <div id="info" style="margin-bottom:8px"></div>
+
+  <h3>Raw JSON response</h3>
+  <pre id="raw">No request yet</pre>
+
+<script>
+  const API = 'http://localhost:4000';
+  const btn = document.getElementById('btnFetch');
+  const raw = document.getElementById('raw');
+  const info = document.getElementById('info');
+  const statusFilter = document.getElementById('statusFilter');
+
+  function showInfo(msg, cls='') {
+    info.innerHTML = `<span class="${cls}">${msg}</span>`;
+  }
+
+  btn.addEventListener('click', async () => {
+    raw.textContent = 'Fetching...';
+    showInfo('Sending GET to: ' + API + '/api/ods', '');
+    try {
+      const q = statusFilter.value ? '?status=' + encodeURIComponent(statusFilter.value) : '';
+      const res = await fetch(API + '/api/ods' + q);
+      showInfo('HTTP ' + res.status + ' ' + res.statusText, res.ok ? 'ok' : 'err');
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        raw.textContent = JSON.stringify(json, null, 2);
+      } catch (e) {
+        raw.textContent = 'Non-JSON response:\\n' + text;
+      }
+      // Also log in console
+      console.log('GET /api/ods result:', res.status, text);
+    } catch (err) {
+      raw.textContent = 'Network error: ' + err.message;
+      showInfo('Network error — check server is running and CORS', 'err');
+      console.error(err);
+    }
+  });
+
+  document.getElementById('btnShowCurl').addEventListener('click', () => {
+    const q = statusFilter.value ? '?status=' + encodeURIComponent(statusFilter.value) : '';
+    const cmd = `curl -i ${API + '/api/ods' + q}`;
+    alert(cmd);
+  });
+
+  // Auto fetch on load
+  btn.click();
+</script>
+</body>
+</html>

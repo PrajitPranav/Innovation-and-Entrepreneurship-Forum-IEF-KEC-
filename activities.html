@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Activities</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<style>
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #111, #333);
+    text-align: center;
+    color: white;
+}
+header {
+    background: linear-gradient(90deg, #000, #444);
+    color: white;
+    padding: 30px 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease-in-out;
+}
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+    animation: fadeIn 1s ease-in-out;
+}
+h1 {
+    color: #ddd;
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+.carousel {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: calc(100% * 2);
+}
+.activity {
+    background: linear-gradient(145deg, #333, #444);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease;
+    height: 250px;
+    width: 250px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    color: white;
+}
+.activity:hover {
+    transform: scale(1.1) rotate(3deg);
+    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #444, #555);
+}
+.activity-details {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+    /* Footer Styling */
+    footer {
+      background-color: #111;
+      color: #bbb;
+      padding: 30px 0;
+      margin-top: 30px;
+    }
+
+    footer a {
+      color: #bbb;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+
+    .footer-section {
+      margin-bottom: 20px;
+      text-align: center; /* Center align the footer */
+    }
+
+    
+
+</style>
+<body>
+    <header>Our Activities</header>
+
+    <!-- Semester 1 -->
+    <div class="container">
+        <h1>Semester 1</h1>
+        <div class="carousel-container" id="carousel1">
+            <div class="carousel">
+                <div class="carousel-track">
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Web Development Workshop</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> March 20, 2025</p>
+                            <p><strong>Chief Guest:</strong> John Doe</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Alan Walker</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Community Service</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> April 5, 2025</p>
+                            <p><strong>Chief Guest:</strong> Dr. Emily Carter</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Sarah Johnson</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Python Bootcamp</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> April 20, 2025</p>
+                            <p><strong>Chief Guest:</strong> Prof. Mark Evan</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Laura Hill</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Robotics Workshop</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> April 30, 2025</p>
+                            <p><strong>Chief Guest:</strong> Dr. Kevin Brown</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Rachel Adams</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Sports Day</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> May 10, 2025</p>
+                            <p><strong>Chief Guest:</strong> Mr. Tom Hardy</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Sandra Lewis</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Coding Hackathon</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> May 25, 2025</p>
+                            <p><strong>Chief Guest:</strong> Alex Johnson</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Michael Scott</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semester 2 -->
+    <div class="container">
+        <h1>Semester 2</h1>
+        <div class="carousel-container" id="carousel2">
+            <div class="carousel">
+                <div class="carousel-track">
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Hackathon</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> July 25, 2025</p>
+                            <p><strong>Chief Guest:</strong> Alex Brown</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Michael Scott</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Cultural Meetup</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> August 12, 2025</p>
+                            <p><strong>Chief Guest:</strong> Rachel Green</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Emily Adams</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Machine Learning Seminar</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> September 10, 2025</p>
+                            <p><strong>Chief Guest:</strong> Dr. Karen White</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Stephen Clark</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Music Fest</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> October 5, 2025</p>
+                            <p><strong>Chief Guest:</strong> Olivia Jones</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Lily Thompson</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Art Exhibition</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> November 2, 2025</p>
+                            <p><strong>Chief Guest:</strong> Emma Brown</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Kevin Martin</p>
+                        </div>
+                    </div>
+                    <div class="activity" onclick="showDetails(this)">
+                        <h3>Entrepreneurship Talk</h3>
+                        <div class="activity-details">
+                            <p><strong>Date:</strong> November 30, 2025</p>
+                            <p><strong>Chief Guest:</strong> Dr. William Ford</p>
+                            <p><strong>Staff Coordinator:</strong> Prof. Harry Smith</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Footer -->
+<footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 footer-section">
+          <h5>About IEF</h5>
+          <p>IEF is an Innovation and Entrepreneurship Forum that aims to connect creative minds and business leaders globally.</p>
+        </div>
+        <div class="col-md-6 footer-section">
+          <h5>Quick Links</h5>
+          <a href="#about">About</a> | <a href="#contact">Contact Us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const activities = document.querySelectorAll(".activity");
+            activities.forEach(activity => {
+                activity.addEventListener("click", function () {
+                    const details = this.querySelector(".activity-details");
+                    const title = this.querySelector("h3");
+                    activities.forEach(a => {
+                        if (a !== activity) {
+                            a.querySelector(".activity-details").style.display = "none";
+                            a.querySelector("h3").style.display = "block";
+                        }
+                    });
+                    if (details.style.display === "none" || details.style.display === "") {
+                        details.style.display = "block";
+                        title.style.display = "none";
+                    } else {
+                        details.style.display = "none";
+                        title.style.display = "block";
+                    }
+                });
+            });
+        });
+    </script>
+    
+</body>
+</html>

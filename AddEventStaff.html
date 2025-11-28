@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KEC-IEF Calendar</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-brand {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .nav-link {
+            color: #fff;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #ccc;
+        }
+
+        /* Containers */
+        .main-container {
+            display: flex;
+            margin-top: 20px;
+            height: calc(100vh - 100px);
+        }
+        .left-container, .right-container {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #555;
+            overflow-y: auto;
+        }
+        .left-container {
+            background-color: #111;
+            max-height: 500px;
+        }
+        .right-container {
+            background-color: #222;
+            max-height: 500px;
+        }
+
+        /* Calendar Styling */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .day-label, .day {
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .day-label {
+            font-weight: bold;
+            background-color: #444;
+        }
+        .day {
+            background-color: #333;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .day:hover {
+            background-color: #555;
+        }
+        .today {
+            background-color: #ff0;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Selected Date Styling */
+        .day.selected {
+            background-color: #fff;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Event Day Styling */
+        .day.event-day {
+            background-color: cornflowerblue;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Dropdown for Year and Month */
+        .calendar-controls select {
+            padding: 5px;
+            margin-right: 10px;
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+
+        /* Button */
+        .add-event-btn {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+            display: block;
+        }
+        .add-event-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            padding-top: 100px;
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="#">KEC-IEF</a>
+    <div class="ml-auto">
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#contact">Contact Us</a>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="main-container">
+    <!-- Left Side (Calendar) -->
+    <div class="left-container">
+        <h3>Select Date</h3>
+        <div class="calendar-controls">
+            <select id="yearSelect" onchange="renderCalendar()">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+            </select>
+            <select id="monthSelect" onchange="renderCalendar()"></select>
+        </div>
+        <div class="calendar" id="calendar"></div>
+        <button class="add-event-btn" onclick="openEventModal()">Add Event</button>
+    </div>
+
+    
+    <!-- Right Side (Event Details) -->
+    <div class="right-container">
+        <h3>Event Details</h3>
+        <div id="event-details">No events found</div>
+    </div>
+</div>
+
+<!-- Event Modal -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeEventModal()">&times;</span>
+        <h4>Add Event</h4>
+        <input type="date" id="eventDate" class="form-control" />
+        <input type="text" id="eventName" placeholder="Event Name" class="form-control mt-2" />
+        <input type="text" id="eventTime" placeholder="Event Time" class="form-control mt-2" />
+        <input type="text" id="eventVenue" placeholder="Venue" class="form-control mt-2" />
+        <button class="btn btn-success mt-3" onclick="addEvent()">Save Event</button>
+    </div>
+</div>
+
+<script>
+    const events = {};
+
+    function openEventModal() {
+        document.getElementById('eventModal').style.display = 'block';
+    }
+
+    function closeEventModal() {
+        document.getElementById('eventModal').style.display = 'none';
+    }
+
+    function addEvent() {
+        const date = document.getElementById('eventDate').value;
+        const name = document.getElementById('eventName').value;
+        const time = document.getElementById('eventTime').value;
+        const venue = document.getElementById('eventVenue').value;
+
+        if (date && name) {
+            events[date] = { time, venue, eventName: name };
+            renderCalendar(); // Refresh calendar
+            closeEventModal();
+        }
+    }
+
+    function populateMonths() {
+        const monthSelect = document.getElementById('monthSelect');
+        for (let i = 0; i < 12; i++) {
+            monthSelect.innerHTML += `<option value="${i}">${new Date(2024, i).toLocaleString('default', { month: 'long' })}</option>`;
+        }
+        monthSelect.value = new Date().getMonth();
+    }
+
+    populateMonths();
+    renderCalendar();
+</script>
+
+</body>
+</html>
