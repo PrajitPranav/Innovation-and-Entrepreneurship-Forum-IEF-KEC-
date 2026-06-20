@@ -7,4 +7,4 @@ A complete college IEF (Innovation & Entrepreneurship Forum) website containing:
 - Staff Event Management
 - Calendar System
 - MongoDB backend
-...
+
